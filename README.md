@@ -37,19 +37,22 @@ Xét về bản chất, Microduck **chưa phải một robot GIS hoặc hệ SLA
 
 Bài viết kết luận rằng Microduck có tiềm năng cao cho **giáo dục robot–SLAM, nghiên cứu GeoAI trong nhà, bản đồ vi mô, bản sao số và thí nghiệm đa robot**, nhưng chỉ đạt giá trị GIS đáng tin cậy khi bổ sung đồng bộ thời gian, hiệu chuẩn nội/ngoại tại, mô hình hệ tọa độ, cơ chế tham chiếu địa lý, chuẩn dữ liệu không gian và đánh giá định lượng bằng ground truth. Với khảo sát địa hình hoặc đo đạc pháp lý, cấu hình hiện tại không thể thay thế thiết bị GNSS/RTK, LiDAR khảo sát hay toàn đạc điện tử.
 
-**Từ khóa:** Microduck; robot hai chân; embodied AI; học tăng cường; sim-to-real; SLAM; visual-inertial odometry; GIS; WebGIS; GeoAI; bản đồ đa robot.
+Một nghiên cứu đối chiếu được bổ sung cho **Beni của Mondo Robotics**, robot camera tự hành hai bánh có khả năng bám theo chủ thể, quay 4K và cơ động trên địa hình phức tạp. Kết quả kiểm toán nguồn cho thấy Mondo Robotics có công bố các repository nghiên cứu mở, nhưng chưa công bố repository, firmware, thiết kế phần cứng hay SDK dành riêng cho Beni. Vì vậy, cần phân biệt nghiêm ngặt giữa “sản phẩm có sử dụng hoặc cùng hệ sinh thái với phần mềm mở” và “toàn bộ sản phẩm là mã nguồn mở”.
+
+**Từ khóa:** Microduck; Beni; robot hai chân; robot camera tự hành; embodied AI; học tăng cường; sim-to-real; SLAM; visual-inertial odometry; GIS; WebGIS; GeoAI; bản đồ đa robot; mã nguồn mở.
 
 ## 1. Câu hỏi nghiên cứu và phương pháp đánh giá
 
-Bài tổng quan trả lời năm câu hỏi:
+Bài tổng quan trả lời sáu câu hỏi:
 
 1. Microduck thực chất là loại nền tảng nào và cơ chế vận hành ra sao?
 2. Những thành phần nào đã sẵn sàng cho SLAM/GIS, những thành phần nào còn thiếu?
 3. Làm thế nào chuyển bản đồ cục bộ của robot thành dữ liệu GIS có hệ tọa độ và nguồn gốc rõ ràng?
 4. Kiến trúc nào phù hợp để truyền dữ liệu từ robot lên WebGIS mà không làm gián đoạn vòng điều khiển 50 Hz?
 5. Tiềm năng ứng dụng đến đâu nếu đánh giá bằng tiêu chí khoa học thay vì chỉ dựa trên trình diễn?
+6. Beni bổ sung góc nhìn nào cho robot camera tự hành, và bằng chứng công khai có đủ để gọi đây là một nền tảng mã nguồn mở hay không?
 
-Phương pháp là **phân tích kiến trúc và bằng chứng trong repository**: đối chiếu `README`, tài liệu thiết kế, roadmap, mã nguồn các crate chính, đặc tả sản phẩm và PR `maploc`; sau đó so sánh với nguyên lý SLAM, mô hình dữ liệu GIS và tiêu chuẩn WebGIS. Bài viết không tuyên bố kết quả thực địa ngoài những số liệu đã được tác giả PR công bố.
+Phương pháp là **phân tích kiến trúc và bằng chứng trong repository**: đối chiếu `README`, tài liệu thiết kế, roadmap, mã nguồn các crate chính, đặc tả sản phẩm và PR `maploc`; sau đó so sánh với nguyên lý SLAM, mô hình dữ liệu GIS và tiêu chuẩn WebGIS. Đối với Beni, bài viết kiểm tra website và chiến dịch chính thức của Mondo Robotics, toàn bộ repository công khai trong tổ chức GitHub, nội dung giấy phép và kết quả tìm kiếm mã theo các từ khóa `Beni` và `unitree_rl_gym`. Bài viết không tuyên bố kết quả thực địa ngoài những số liệu đã được nguồn công khai báo cáo.
 
 | Mức bằng chứng | Ý nghĩa trong bài |
 |---|---|
@@ -254,7 +257,103 @@ flowchart TB
 
 WebRTC hiện có là lợi thế lớn để truyền video và control channel, nhưng cần một lớp schema địa không gian phía trên. Một stream có hình ảnh đẹp vẫn chưa phải WebGIS nếu thiếu timestamp, pose, CRS, chất lượng và truy xuất lịch sử.
 
-## 8. Ứng dụng tiềm năng
+## 8. Nghiên cứu đối chiếu: Beni của Mondo Robotics
+
+### 8.1 Bản chất sản phẩm và trạng thái bằng chứng
+
+[Beni](https://mondorobotics.com/) được Mondo Robotics định vị là **robot camera tự hành hai bánh, tự cân bằng**, có nhiệm vụ bám theo người hoặc thú cưng và quay phim từ góc nhìn sát mặt đất. Khác với Microduck - nền tảng phần mềm robot mở hướng tới học tập và thử nghiệm - Beni trước hết là một sản phẩm camera tiêu dùng đang được huy động vốn và chuẩn bị giao qua [Kickstarter](https://www.kickstarter.com/projects/mondorobotics/beni-all-terrain-camera-robot). Do đó, các thông số dưới đây là **công bố của nhà sản xuất/chiến dịch**, chưa phải kết quả kiểm định độc lập hay chứng nhận đo lường.
+
+| Thuộc tính | Thông tin công khai ngày 05/09/2026 | Diễn giải khoa học |
+|---|---|---|
+| Nhiệm vụ chính | Bám theo bằng thị giác, giữ chủ thể trong khung hình, quay phim và hỗ trợ tạo video nổi bật | Đây là autonomous cinematography, không đồng nghĩa với tự hành theo bản đồ hay SLAM. |
+| Tốc độ cực đại | 17,9 mph, tương đương khoảng 28,8 km/h | Là thông số cực đại do hãng công bố; tốc độ khả dụng khi bám chủ thể, tránh vật cản hoặc quay ổn định có thể thấp hơn. |
+| Vượt địa hình | Chiến dịch nêu mức nhảy/vượt vật cản tối đa 10 inch, tương đương 25,4 cm; website mô tả cỏ, sỏi, lề đường và bậc đá | Cần phân biệt độ cao cú nhảy với kích thước vật cản có thể vượt lặp lại. Chưa có protocol công khai về độ dốc, hệ số bám, tải, tỷ lệ thành công hay số chu kỳ. |
+| Phục hồi | Có cơ chế tự lật/tự đứng lại sau khi đổ | Giảm nhu cầu can thiệp, nhưng không chứng minh robot sẽ tiếp tục định vị đúng sau va chạm. |
+| Camera | 4K@30 fps, 3K@60 fps, 1080p@100 fps; chiến dịch mô tả HDR, ổn định hình ảnh và cân bằng đường chân trời | Độ phân giải video cao hỗ trợ nhận dạng và SfM, nhưng độ chính xác hình học còn phụ thuộc rolling shutter, bitrate, motion blur, nội chuẩn và timestamp. |
+| Pin | Trang đặc tả nêu 1,5 giờ mỗi pin; một bài hướng dẫn chính thức nêu khoảng 1 giờ 45 phút | Hai con số chính thức chưa hoàn toàn thống nhất. Nên dùng khoảng công bố 90-105 phút và đo lại theo tốc độ, địa hình, quay phim và nhiệt độ. Pin có thể thay nhanh. |
+| Kích thước/khối lượng | 21,5 × 18 × 18 cm; 1,75 kg theo trang đặc tả | Nhỏ gọn hơn nhiều nền tảng khảo sát, nhưng tải hữu ích và vị trí lắp thêm cảm biến chưa được công bố. |
+| Lưu trữ và riêng tư | 32 GB trong máy, khe microSD; bám theo và quay mặc định xử lý trên thiết bị; AI editing trực tuyến là tùy chọn | Tốt cho thu thập ngoại tuyến. “Xử lý tại chỗ” không tự động cung cấp API, log pose hay quyền truy cập dữ liệu cảm biến thô. |
+| Điều khiển | Tự bám theo; có Pilot Mode và bộ điều khiển chuyển động để lái thủ công | Hỗ trợ cả autonomy lẫn teleoperation, nhưng chưa thấy giao diện lập trình công khai. |
+| Môi trường | Dùng trong nhà/ngoài trời thông thường; hãng yêu cầu không ngâm nước hoặc dùng dưới mưa lớn | Đây là giới hạn quan trọng với khảo sát hiện trường; chưa có cấp IP công khai trên nguồn được kiểm tra. |
+| Mức trưởng thành | Đã có hơn 30 máy thử nghiệm với người dùng theo hãng; chiến dịch vẫn ở giai đoạn huy động vốn/chuẩn bị giao hàng mùa thu 2026 | Chưa nên đồng nhất mẫu thử và video trình diễn với độ tin cậy của sản phẩm sản xuất hàng loạt. |
+
+Thông tin “đội ngũ gồm cựu kỹ sư DJI và Tesla” cũng cần thận trọng. Trang giới thiệu chính thức chỉ xác nhận đội ngũ hơn 200 kỹ sư và nghệ sĩ tại Thâm Quyến và Palo Alto; chiến dịch nói chung về nhân sự từ các công ty robot và điện tử tiêu dùng hàng đầu. Một số bài báo nhắc DJI, nhưng trong các nguồn chính thức được kiểm tra chưa có bằng chứng đủ để xác nhận đồng thời DJI và Tesla cho nhóm phát triển Beni.
+
+### 8.2 Nguyên lý của robot camera tự hành
+
+Mondo Robotics chưa công bố kiến trúc nội bộ của Beni. Từ chức năng đã mô tả, có thể xây dựng **mô hình nguyên lý**, không phải khẳng định về mã độc quyền, gồm bốn vòng liên kết:
+
+1. **Nhận biết và theo dõi chủ thể:** detector/re-identification tạo trạng thái tương đối của người hoặc thú cưng từ chuỗi ảnh. Khi che khuất ngắn, mô hình chuyển động dự đoán vị trí xuất hiện lại; khi mất hoàn toàn, robot dừng theo công bố của hãng.
+2. **Lập kế hoạch góc máy:** bộ điều khiển chuyển vị trí ảnh, khoảng cách và góc quay mong muốn thành vận tốc tiến/quay. Các chế độ đi sau, song song, phía trước hoặc quay vòng quanh chủ thể là các quỹ đạo tương đối, không nhất thiết cần bản đồ toàn cục.
+3. **Điều khiển thân xe:** bộ cân bằng phản hồi nhanh phối hợp bánh và các khớp/chân có đàn hồi để chạy, nhảy, hấp thụ va chạm và tự phục hồi. Tránh vật cản là một lớp an toàn cục bộ nằm giữa lệnh bám theo và actuator.
+4. **Ổn định và lưu video:** ước lượng chuyển động dùng để chống rung/cân bằng đường chân trời, sau đó mã hóa vào bộ nhớ cục bộ; người dùng mới chọn dữ liệu để xử lý trực tuyến khi cần.
+
+Một biểu diễn tối giản là:
+
+```math
+\hat y_t = T_{\phi}(I_{0:t}), \qquad
+u_t = \pi_{\theta}(\hat y_t, s_t, r_t), \qquad
+I_t^{out} = S_{\psi}(I_t, \hat\omega_t),
+```
+
+trong đó $I_{0:t}$ là chuỗi ảnh, $\hat y_t$ là trạng thái tương đối ước lượng của chủ thể, $s_t$ là trạng thái thân xe, $r_t$ là yêu cầu về góc máy, $u_t$ là lệnh vận động và $S_{\psi}$ là phép ổn định video. Chuỗi này cho thấy **auto-follow không bắt buộc phải có SLAM**: robot có thể điều khiển theo sai lệch ảnh và khoảng cách tương đối mà không xây một bản đồ metric bền vững.
+
+### 8.3 Kiểm toán tuyên bố “mã nguồn mở”
+
+Tại thời điểm đối chiếu, tổ chức [Mondo Robotics trên GitHub](https://github.com/Mondo-Robotics) hiển thị ba repository công khai. Không repository nào tự mô tả là mã nguồn, firmware hoặc thiết kế của Beni.
+
+| Repository | Nội dung thực tế | Giấy phép/phạm vi | Quan hệ có thể khẳng định với Beni |
+|---|---|---|---|
+| [`DiT4DiT`](https://github.com/Mondo-Robotics/DiT4DiT) | Vision-Action Model kết hợp sinh video và dự đoán hành động cho thao tác robot; có ví dụ Unitree G1 | MIT cho mã của dự án | Thể hiện năng lực nghiên cứu VAM của Mondo; không có bằng chứng đây là stack bám theo, camera hay locomotion của Beni. |
+| [`PMT`](https://github.com/Mondo-Robotics/PMT) | Huấn luyện policy motion-tracking cho humanoid Unitree G1 trên Isaac Lab, có perception địa hình và backend MuJoCo | Mã riêng BSD-3-Clause; bản phân phối chứa BFM-Zero CC BY-NC 4.0 nên có hạn chế phi thương mại nếu không loại phần đó | Có liên hệ chủ đề với học tăng cường và chuyển động, nhưng README xác định phạm vi là G1; không phải mã Beni. |
+| [`gamepads`](https://github.com/Mondo-Robotics/gamepads) | Fork plugin Flutter để nhận đầu vào gamepad đa nền tảng | Repository thành phần độc lập | Có thể hữu ích cho giao diện điều khiển nói chung, nhưng không đủ để suy ra nó là ứng dụng hoặc firmware Beni. |
+
+Tìm kiếm mã trong toàn bộ tổ chức không trả về kết quả cho `Beni` hoặc `unitree_rl_gym`. Vì vậy, tuyên bố “Mondo Robotics xác nhận dùng `unitree_rl_gym` để phát triển Beni” **chưa được chứng minh bởi GitHub công khai**. Hơn nữa, [`unitree_rl_gym`](https://github.com/unitreerobotics/unitree_rl_gym) là framework huấn luyện học tăng cường dựa trên Isaac Gym, có quy trình train - play - sim-to-sim - sim-to-real cho robot Unitree; nó **không phải ROS**. ROS là middleware robot, còn `unitree_rl_gym` là môi trường và mã huấn luyện/triển khai policy.
+
+Để gọi một nền tảng robot là mở ở cấp hệ thống, tối thiểu phải kiểm tra riêng năm lớp:
+
+| Lớp mở | Bằng chứng cần có | Trạng thái Beni trên nguồn công khai đã kiểm tra |
+|---|---|---|
+| Thành phần nghiên cứu | Repository và giấy phép cho thuật toán độc lập | Có: DiT4DiT, PMT và gamepads. |
+| Phần mềm sản phẩm | Firmware, runtime, app/SDK, build và quy trình triển khai của chính Beni | Chưa thấy công bố. |
+| Phần cứng | CAD, sơ đồ điện, PCB, BOM, giao diện nguồn/cảm biến và giấy phép phần cứng | Chưa thấy công bố. |
+| Mô hình và dữ liệu | Trọng số, dữ liệu huấn luyện, calibration và quyền tái sử dụng | Chưa thấy bộ Beni công khai. |
+| Khả năng mở rộng | API ổn định, telemetry, sensor stream, lệnh điều khiển và tài liệu an toàn | Chưa thấy SDK/API Beni công khai. |
+
+Kết luận chính xác là: **Mondo Robotics công bố một số công trình phần mềm mở, nhưng Beni chưa được chứng minh là robot mã nguồn mở**. Đây là đánh giá theo bằng chứng công khai ngày 05/09/2026, không phải khẳng định rằng công ty không bao giờ sử dụng mã mở hoặc sẽ không phát hành SDK trong tương lai.
+
+### 8.4 Tiềm năng SLAM, GIS và WebGIS của Beni
+
+Beni có ba ưu thế tự nhiên cho thu nhận dữ liệu không gian: camera độ phân giải cao, góc nhìn động sát mặt đất và khả năng cơ động nhanh hơn Microduck. Tuy nhiên, **video 4K không tự sinh tọa độ GIS**. Một hệ mobile mapping cần quan sát đồng bộ, pose có covariance, hiệu chuẩn camera và liên kết đến hệ tham chiếu bên ngoài.
+
+| Năng lực mục tiêu | Giá trị tiềm năng của Beni | Thành phần còn phải được công bố hoặc bổ sung |
+|---|---|---|
+| Visual SLAM/SfM | Video 4K và chuyển động đa góc có thể tạo feature dày, texture và mô hình 3D | Camera gốc không qua ổn định/crop, intrinsics, distortion, rolling-shutter model, timestamp và quyền truy cập frame. |
+| Visual-inertial odometry | Bộ cân bằng gần như chắc chắn cần trạng thái quán tính ở mức sản phẩm, nhưng luồng này chưa được công khai | IMU thô, clock chung camera-IMU, extrinsics, tần số và bias model. Không nên suy luận khả năng API từ việc robot tự cân bằng. |
+| Wheel/leg odometry | Hai bánh cho prior chuyển động tốt trên nền bám; khớp nhảy giúp vượt bậc | Encoder và trạng thái tiếp xúc; mô hình trượt. Cú nhảy/va chạm gây gián đoạn pose và motion blur. |
+| Bản đồ địa hình/khả năng đi qua | Dữ liệu bám theo trên cỏ, sỏi, lề đường và bậc có thể hỗ trợ học traversability | Depth/range thô, nhãn địa hình, pose chuẩn, tiêu chí an toàn và dữ liệu thất bại. Camera tránh vật cản không tương đương point cloud đo đạc. |
+| Tham chiếu GIS | Phù hợp ghi nhận tài sản, tuyến kiểm tra hoặc video tuyến ở quy mô gần người | GNSS/RTK ngoài trời hoặc UWB/GCP trong nhà, phép biến đổi `map → CRS`, mốc kiểm tra độc lập và RMSE. |
+| WebGIS thời gian thực | Media cục bộ, ứng dụng điều khiển và kết nối không dây là tiền đề tốt | SDK/API, schema sự kiện, pose stream, cơ sở dữ liệu không gian, quyền truy cập, OGC API/tiles và cơ chế replay. |
+| Đa robot | Kích thước nhỏ và pin thay nhanh có thể tạo fleet camera di động | Nhận dạng robot, đồng bộ thời gian, chia sẻ submap, loop closure liên robot, điều phối và API chính thức. |
+
+Các ứng dụng GIS hợp lý nếu giao diện dữ liệu được mở gồm kiểm kê tài sản ở góc thấp, video tuyến có tọa độ, cập nhật bản sao số trong nhà, giám sát lối đi/công viên, thu dữ liệu khả năng vượt địa hình và khảo sát nhanh sau sự kiện. Beni chưa phù hợp cho địa chính, đo biến dạng hoặc sản phẩm bản đồ có yêu cầu pháp lý nếu thiếu cảm biến khảo sát và chứng nhận sai số.
+
+Thử nghiệm khoa học tối thiểu nên báo cáo: ATE/RPE của quỹ đạo; RMSE tại checkpoint độc lập; tỷ lệ giữ bám và thời gian tái bắt chủ thể; precision/recall tránh vật cản; tỷ lệ vượt bậc/tự phục hồi; độ nhòe, rung và tỷ lệ frame hữu dụng theo tốc độ; thời lượng pin theo địa hình; nhiệt độ, độ trễ và số lần dừng an toàn. Cần công bố cả run thất bại, không chỉ video quảng bá.
+
+### 8.5 So sánh vai trò nghiên cứu của Microduck và Beni
+
+| Tiêu chí | Microduck | Beni |
+|---|---|---|
+| Mục tiêu chính | Embodied AI, học tập, tương tác và thử nghiệm phần mềm robot nhỏ | Camera tự hành tiêu dùng, bám theo và quay chủ thể ngoài đời thực |
+| Hình thái | Hai chân, đầu/cổ/mỏ có khớp; có thể gắn bánh | Hai bánh tự cân bằng, chân/khớp hỗ trợ nhảy và tự phục hồi |
+| Bằng chứng mở | Runtime Rust và môi trường RL công khai theo giấy phép mở; phần cứng không mở | Có repository nghiên cứu của Mondo, nhưng chưa có stack hay phần cứng Beni công khai |
+| Lợi thế cho SLAM | Truy cập mã điều khiển, cảm biến và kiến trúc dịch vụ thuận lợi cho instrument/replay | Camera tốt và cơ động mạnh, nhưng chưa có bằng chứng về raw sensor/pose API |
+| Hạn chế cho GIS | ToF thấp, tài nguyên nhỏ, rung bước chân, thiếu georeferencing | Tốc độ/nhảy gây blur và shock, không chống mưa lớn, thiếu SDK/CRS/benchmark công khai |
+| Vị thế phù hợp | Nền tảng nghiên cứu có thể sửa đổi và tái lập | Nền tảng thu hình tiềm năng, phụ thuộc mức mở của giao diện sản phẩm |
+
+Beni và Microduck vì vậy không phải hai sản phẩm thay thế trực tiếp. Beni có ưu thế về hiệu năng quay phim và cơ động sản phẩm; Microduck có ưu thế về khả năng quan sát, sửa đổi và tái lập phần mềm nghiên cứu. Nếu Mondo Robotics phát hành SDK cung cấp camera/IMU/encoder đồng bộ, calibration, pose và lệnh an toàn, Beni có thể trở thành bệ mobile mapping đáng chú ý. Trước khi đó, mọi kiến trúc Beni-SLAM-GIS-WebGIS chỉ nên được ghi là **đề xuất có điều kiện**, không phải tính năng hiện hữu.
+
+## 9. Ứng dụng tiềm năng
 
 | Ứng dụng | Giá trị của Microduck | Điều kiện để dùng nghiêm túc |
 |---|---|---|
@@ -268,9 +367,9 @@ WebRTC hiện có là lợi thế lớn để truyền video và control channel
 | Tìm kiếm cứu nạn trong mô hình | Huấn luyện chiến lược khám phá và phối hợp | Chỉ dùng trong môi trường thí nghiệm; chưa có IP rating hay chứng nhận an toàn hiện trường |
 | Khảo sát GIS ngoài trời | Thu thập quan sát bổ trợ, kiểm tra ý tưởng | Cần RTK-GNSS, cảm biến khảo sát, hiệu chuẩn và kiểm định; không dùng cho địa chính hiện tại |
 
-## 9. Đánh giá toàn diện
+## 10. Đánh giá toàn diện
 
-Thang điểm 0–5 dưới đây là **rubric chuyên gia dựa trên bằng chứng repository**, không phải kết quả chứng nhận. “Hiện tại” phản ánh nhánh chính ngày 05/09/2026; “sau lộ trình” giả định các bước ở Mục 11 được triển khai và vượt qua kiểm thử.
+Thang điểm 0–5 dưới đây là **rubric chuyên gia dựa trên bằng chứng repository**, không phải kết quả chứng nhận. “Hiện tại” phản ánh nhánh chính ngày 05/09/2026; “sau lộ trình” giả định các bước ở Mục 12 được triển khai và vượt qua kiểm thử.
 
 | Tiêu chí | Hiện tại | Sau lộ trình | Nhận định |
 |---|---:|---:|---|
@@ -284,7 +383,7 @@ Thang điểm 0–5 dưới đây là **rubric chuyên gia dựa trên bằng ch
 | Độ bền hiện trường | 1,5 | 2,8 | Thiết bị tiêu dùng/giáo dục, chưa công bố chuẩn IP, rung sốc hay độ chính xác khảo sát. |
 | Giá trị đào tạo và nghiên cứu mở | 4,8 | 5,0 | Đây là lợi thế rõ nhất: quan sát được toàn bộ chuỗi policy–runtime–sensor–network. |
 
-### 9.1 Điểm mạnh cốt lõi
+### 10.1 Điểm mạnh cốt lõi
 
 - Kích thước nhỏ và hình thái hai chân tạo bài toán nghiên cứu khác biệt so với xe bánh.
 - Phần mềm mở, giấy phép rộng và kiến trúc có tài liệu quyết định kỹ thuật chi tiết.
@@ -293,7 +392,7 @@ Thang điểm 0–5 dưới đây là **rubric chuyên gia dựa trên bằng ch
 - Dịch vụ cảm nhận tách khỏi `robotd` phù hợp yêu cầu fault containment.
 - Cập nhật có xác minh và rollback đặc biệt hữu ích cho fleet nghiên cứu.
 
-### 9.2 Hạn chế quyết định
+### 10.2 Hạn chế quyết định
 
 - Chưa có SLAM ổn định trên `main`; `maploc` là công việc đang mở.
 - ToF 8×8 có độ phân giải góc thấp, dễ nhập nhằng trong phòng có cấu trúc lặp.
@@ -304,11 +403,11 @@ Thang điểm 0–5 dưới đây là **rubric chuyên gia dựa trên bằng ch
 - Phần cứng không mở; tùy biến sâu phụ thuộc khả năng tiếp cận cơ khí/điện tử thực tế.
 - Roadmap còn nêu app, SDK, autonomous brain và truy cập ngoài LAN là các phần chưa hoàn chỉnh.
 
-## 10. Thiết kế thực nghiệm để biến tiềm năng thành bằng chứng
+## 11. Thiết kế thực nghiệm để biến tiềm năng thành bằng chứng
 
 Một công bố khoa học về Microduck-SLAM không nên chỉ trình diễn video. Tối thiểu cần:
 
-### 10.1 Bộ kịch bản
+### 11.1 Bộ kịch bản
 
 - Phòng nhiều texture và phòng tường trắng/ít texture.
 - Ánh sáng ổn định, ánh sáng thay đổi và camera bị motion blur.
@@ -317,11 +416,11 @@ Một công bố khoa học về Microduck-SLAM không nên chỉ trình diễn 
 - Vòng kín, hành lang dài, hai phòng có hình học tương tự và khởi động lại ở vị trí lạ.
 - Mỗi cấu hình lặp ít nhất 10 lần; giữ cả lần thất bại, không chỉ chọn run đẹp.
 
-### 10.2 Ground truth
+### 11.2 Ground truth
 
 Có thể dùng motion capture, AprilTag đã đo tọa độ, total station hoặc camera trần được hiệu chuẩn. Mốc dùng để ước lượng biến đổi `map → GIS` phải tách khỏi mốc kiểm tra độc lập để tránh đánh giá trên chính dữ liệu hiệu chỉnh.
 
-### 10.3 Chỉ số bắt buộc
+### 11.3 Chỉ số bắt buộc
 
 | Nhóm | Chỉ số |
 |---|---|
@@ -336,7 +435,7 @@ Có thể dùng motion capture, AprilTag đã đo tọa độ, total station ho�
 
 Mỗi dataset phải lưu camera/IMU/ToF/khớp, timestamp gốc, calibration, commit SHA, cấu hình robot, phiên bản policy và seed. Không có provenance này thì không thể tái tạo kết quả hoặc phân biệt lỗi thuật toán với thay đổi phần mềm.
 
-## 11. Lộ trình phát triển đề xuất
+## 12. Lộ trình phát triển đề xuất
 
 ### Giai đoạn 0 - Đóng băng baseline
 
@@ -381,19 +480,21 @@ Mỗi dataset phải lưu camera/IMU/ToF/khớp, timestamp gốc, calibration, c
 - Vỏ bảo vệ, quản lý nhiệt/năng lượng, kiểm thử rung–rơi–bụi–ẩm, quyền riêng tư camera và threat model.
 - **Cổng nghiệm thu:** công bố điều kiện vận hành, failure envelope và quy trình dừng an toàn; không quảng bá vượt quá cấp thử nghiệm đã kiểm chứng.
 
-## 12. An toàn, bảo mật và đạo đức dữ liệu
+## 13. An toàn, bảo mật và đạo đức dữ liệu
 
 Robot có camera/microphone và khả năng điều khiển từ xa nên một triển khai WebGIS phải tách ba quyền: **xem telemetry**, **xem media**, và **điều khiển chuyển động**. Không nên biến một endpoint bản đồ công khai thành đường đi vòng vào API điều khiển.
 
 Các yêu cầu tối thiểu gồm xác thực từng robot/người dùng, mã hóa khi truyền, token ngắn hạn, phân quyền theo nhiệm vụ, audit log, giới hạn lệnh, deadman, xác nhận phiên camera và chỉ báo ghi hình. Dữ liệu ảnh/âm thanh cần chính sách lưu giữ và làm mờ phù hợp. Trước khi truy cập qua Internet, phải giải quyết các mục bảo mật và consent còn mở trong roadmap thay vì chỉ thêm port-forward.
 
-## 13. Kết luận
+## 14. Kết luận
 
 Microduck không chỉ là “một chú vịt biết đi”. Giá trị nghiên cứu của nó nằm ở việc kết hợp **cơ thể robot nhỏ, chính sách sim-to-real, cảm biến, phần mềm biên mô-đun và quy trình cập nhật có thể quay lui**. Sự kết hợp này làm Microduck trở thành một ứng viên rất tốt cho phòng thí nghiệm SLAM và GeoAI ở quy mô phòng học/phòng nghiên cứu.
 
 Tuy vậy, gọi Microduck hiện tại là “nền tảng GIS lý tưởng” sẽ quá sớm nếu không nêu điều kiện. Nó là **nền tảng tiền-SLAM giàu tiềm năng**, không phải thiết bị lập bản đồ hoàn thiện. Để biến tiềm năng thành năng lực GIS, dự án phải hoàn thành bốn cầu nối: (1) đồng bộ–hiệu chuẩn, (2) SLAM được benchmark, (3) georeferencing có sai số, và (4) pipeline dữ liệu/chuẩn WebGIS. Khi bốn lớp này được thực hiện minh bạch, Microduck có thể trở thành một “phòng thí nghiệm không gian di động thu nhỏ” có giá trị đặc biệt cho giáo dục, active perception, multi-robot mapping và nghiên cứu embodied geospatial intelligence.
 
-## 14. Robot có thể làm gì ngay hôm nay?
+Trường hợp đối chiếu Beni củng cố một kết luận phương pháp luận: hiệu năng vận động và hình ảnh mạnh không tự động tạo ra một nền tảng GIS mở. Beni có tiềm năng thu hình di động lớn hơn, nhưng giá trị nghiên cứu SLAM/WebGIS còn phụ thuộc việc Mondo Robotics công bố SDK, dữ liệu cảm biến đồng bộ, calibration, pose và điều khoản tái sử dụng. Các repository nghiên cứu công khai của Mondo là bằng chứng về đóng góp phần mềm mở ở cấp thành phần, không phải bằng chứng rằng toàn bộ Beni đã được mở.
+
+## 15. Robot có thể làm gì ngay hôm nay?
 
 <table>
 <tr>
@@ -424,7 +525,7 @@ Tuy vậy, gọi Microduck hiện tại là “nền tảng GIS lý tưởng” 
 
 Robot cũng có thể ngồi, đá bóng, lộn/trườn theo policy, phát âm thanh và thực hiện các hành vi đang được mở rộng trong hệ sinh thái.
 
-## 15. Điều hướng repository
+## 16. Điều hướng repository
 
 ### Dành cho người đang sử dụng robot
 
@@ -448,14 +549,14 @@ Robot cũng có thể ngồi, đá bóng, lộn/trườn theo policy, phát âm 
 | [Đóng góp](CONTRIBUTING.md) | Quy ước build, test, cấu trúc và phát hành. |
 | [Chỉ mục tài liệu](docs/README.md) | Toàn bộ tài liệu thiết kế và vấn đề mở. |
 
-## 16. Ghi công và giấy phép
+## 17. Ghi công và giấy phép
 
 - **Dự án gốc:** [Pollen Robotics / Microduck](https://github.com/pollen-robotics/microduck), thuộc đội ngũ robotics của Hugging Face.
 - **Bản Việt hóa, hiệu đính và phát triển nội dung khoa học:** **Long Ngo - Vietflexmap, 2026.**
-- **Phạm vi đóng góp của bản này:** diễn giải tiếng Việt, phân tích SLAM–GIS–WebGIS, mô hình kiến trúc, khung đánh giá, giả thuyết và lộ trình kiểm chứng.
+- **Phạm vi đóng góp của bản này:** diễn giải tiếng Việt, phân tích SLAM–GIS–WebGIS, đối chiếu Beni và kiểm toán tính mở, mô hình kiến trúc, khung đánh giá, giả thuyết và lộ trình kiểm chứng.
 - **Giấy phép mã nguồn:** [Apache License 2.0](LICENSE). Việc ghi công bản phân tích không thay đổi quyền tác giả đối với mã nguồn và thiết kế gốc.
 
-## 17. Tài liệu tham khảo
+## 18. Tài liệu tham khảo
 
 1. Pollen Robotics, [Microduck - source code and technical documentation](https://github.com/pollen-robotics/microduck), truy cập 05/09/2026.
 2. Pollen Robotics, [Microduck press kit and provisional specifications](https://pollen-robotics.com/microduck/press-kit/), 2026.
@@ -473,6 +574,14 @@ Robot cũng có thể ngồi, đá bóng, lộn/trườn theo policy, phát âm 
 14. W. Hess et al., [Real-Time Loop Closure in 2D LIDAR SLAM](https://doi.org/10.1109/ICRA.2016.7487258), *IEEE ICRA*, 2016.
 15. E. Todorov, T. Erez and Y. Tassa, [MuJoCo: A Physics Engine for Model-Based Control](https://doi.org/10.1109/IROS.2012.6386109), *IEEE/RSJ IROS*, 2012.
 16. J. Sturm et al., [A Benchmark for the Evaluation of RGB-D SLAM Systems](https://doi.org/10.1109/IROS.2012.6385773), *IEEE/RSJ IROS*, 2012.
+17. Mondo Robotics, [Beni - official product specifications](https://mondorobotics.com/), truy cập 05/09/2026.
+18. Mondo Robotics, [Meet Beni, Your First All-Terrain Camera Robot](https://www.kickstarter.com/projects/mondorobotics/beni-all-terrain-camera-robot), Kickstarter, 2026.
+19. Mondo Robotics, [Meet Beni: The Camera Robot That Captures What You'd Otherwise Miss](https://mondorobotics.com/blogs/guides/meet-beni-the-camera-robot-that-captures-what-youd-otherwise-miss), 29/07/2026.
+20. Mondo Robotics, [About Mondo Robotics](https://mondorobotics.com/pages/about-us), truy cập 05/09/2026.
+21. Mondo Robotics, [GitHub organization and public repositories](https://github.com/Mondo-Robotics), truy cập 05/09/2026.
+22. Mondo Robotics, [PMT - Perceptive Motion Tracking](https://github.com/Mondo-Robotics/PMT), 2026.
+23. Mondo Robotics, [DiT4DiT - Jointly Modeling Video Dynamics and Actions for Generalizable Robot Control](https://github.com/Mondo-Robotics/DiT4DiT), 2026.
+24. Unitree Robotics, [`unitree_rl_gym` - reinforcement-learning implementation for Unitree robots](https://github.com/unitreerobotics/unitree_rl_gym), truy cập 05/09/2026.
 
 ---
 
