@@ -173,7 +173,7 @@ Camera và cảm biến trên Microduck chịu chuyển động lắc tuần ho�
 ### 5.3 Hệ khung tọa độ bắt buộc
 
 ```mermaid
-flowchart LR
+flowchart TB
     A["earth / CRS GIS"] --> B["map · bản đồ SLAM"]
     B --> C["odom · liên tục cục bộ"]
     C --> D["base_link · thân robot"]
