@@ -53,9 +53,9 @@ Phương pháp là **phân tích kiến trúc và bằng chứng trong repositor
 
 | Mức bằng chứng | Ý nghĩa trong bài |
 |---|---|
-| **A — Đã hiện hữu** | Có trên nhánh `main`, tài liệu chính thức hoặc đặc tả sản phẩm hiện hành. |
-| **B — Thử nghiệm** | Có mã/đo đạc trong PR hay nhánh chưa hợp nhất; không được xem là tính năng sản phẩm ổn định. |
-| **C — Đề xuất** | Kiến trúc và giả thuyết do bản phân tích này phát triển; cần triển khai và kiểm chứng. |
+| **A - Đã hiện hữu** | Có trên nhánh `main`, tài liệu chính thức hoặc đặc tả sản phẩm hiện hành. |
+| **B - Thử nghiệm** | Có mã/đo đạc trong PR hay nhánh chưa hợp nhất; không được xem là tính năng sản phẩm ổn định. |
+| **C - Đề xuất** | Kiến trúc và giả thuyết do bản phân tích này phát triển; cần triển khai và kiểm chứng. |
 
 ## 2. Bản chất của Microduck
 
@@ -130,14 +130,13 @@ Các chính sách chuyển động được huấn luyện trong repository [`mi
 
 Với họ chính sách hiện tại, repository kiểm tra chặt hình dạng quan sát 61 chiều. Mô hình khái quát có thể viết:
 
-$$
-a_t = \pi_{\theta}(o_t), \qquad
-o_t = f(\omega_t, g_t, q_t, \dot q_t, a_{t-1}, c_t),
-$$
+```math
+a_t = \pi_{\theta}(o_t), \qquad o_t = f(\omega_t, g_t, q_t, \dot q_t, a_{t-1}, c_t),
+```
 
 trong đó $o_t$ là quan sát, $a_t$ là lệnh hành động, $q_t$ và $\dot q_t$ là vị trí/tốc độ khớp, $\omega_t$ là vận tốc góc, $g_t$ là hướng trọng lực ước lượng và $c_t$ là lệnh cấp cao.
 
-PPO không “học bản đồ” trong cấu hình hiện tại. Có thể dùng học tăng cường cho chiến lược khám phá—chẳng hạn thưởng vùng mới và phạt va chạm—nhưng pose, loop closure và hệ tọa độ vẫn cần một bộ ước lượng trạng thái có thể kiểm tra được. Cách an toàn là để RL điều khiển **hành vi khám phá**, còn SLAM/GIS cung cấp **trạng thái không gian và bản đồ**.
+PPO không “học bản đồ” trong cấu hình hiện tại. Có thể dùng học tăng cường cho chiến lược khám phá - chẳng hạn thưởng vùng mới và phạt va chạm - nhưng pose, loop closure và hệ tọa độ vẫn cần một bộ ước lượng trạng thái có thể kiểm tra được. Cách an toàn là để RL điều khiển **hành vi khám phá**, còn SLAM/GIS cung cấp **trạng thái không gian và bản đồ**.
 
 ## 5. Từ cảm biến đến SLAM
 
@@ -145,10 +144,9 @@ PPO không “học bản đồ” trong cấu hình hiện tại. Có thể dù
 
 SLAM đồng thời ước lượng quỹ đạo robot và cấu trúc môi trường từ các phép đo có nhiễu. Một mô hình tối ưu đồ thị tư thế có dạng:
 
-$$
-\hat{X} = \arg\min_X \sum_{(i,j)\in\mathcal{E}}
-\rho\left(\left\|z_{ij} \ominus h_{ij}(X)\right\|_{\Omega_{ij}}^2\right),
-$$
+```math
+\hat{X} = \arg\min_X \sum_{(i,j)\in\mathcal{E}} \rho\left(\left\|z_{ij} \ominus h_{ij}(X)\right\|_{\Omega_{ij}}^2\right),
+```
 
 trong đó $X$ là các pose cần tìm, $z_{ij}$ là ràng buộc từ odometry, IMU, camera, ToF hoặc loop closure; $\Omega_{ij}$ biểu diễn độ tin cậy và $\rho$ là hàm mất mát bền vững với ngoại lệ.
 
@@ -183,9 +181,9 @@ flowchart TB
 
 `map` của SLAM là hệ mét cục bộ và thường có gốc tùy ý. Nó **không tự động trở thành GIS**. Muốn đặt dữ liệu lên bản đồ địa lý, phải ước lượng phép biến đổi từ hệ `map` sang một CRS đã biết bằng GNSS/RTK, UWB đã đo tọa độ, mốc khống chế/GCP, AprilTag có tọa độ hoặc total station. Dạng đơn giản:
 
-$$
+```math
 p_{GIS} = sR\,p_{map} + t,
-$$
+```
 
 với $R$ là phép quay, $t$ là tịnh tiến và $s$ là tỷ lệ khi hệ quan sát chưa bảo toàn thang đo. Sai số còn lại phải được báo cáo bằng RMSE tại các mốc kiểm tra độc lập.
 
@@ -331,7 +329,7 @@ Có thể dùng motion capture, AprilTag đã đo tọa độ, total station ho�
 | Loop closure | precision, recall, số đóng vòng giả và độ lớn hiệu chỉnh |
 | Tái định vị | tỷ lệ thành công, thời gian khôi phục, sai số sau khôi phục |
 | Bản đồ | IoU occupancy, độ hoàn chỉnh, độ dày tường, Chamfer distance/độ lệch mặt phẳng |
-| GIS | RMSE tại checkpoint, CRS/datum, sai số ngang và—nếu có—sai số cao độ |
+| GIS | RMSE tại checkpoint, CRS/datum, sai số ngang và - nếu có - sai số cao độ |
 | Hệ thống | CPU, RAM, nhiệt độ, công suất, frame drop, latency đầu-cuối |
 | An toàn thời gian thực | tần số vòng điều khiển, số deadline miss, jitter trước/sau khi bật SLAM |
 | Fleet | thời gian hoàn tất, độ phủ, băng thông, xung đột submap và khả năng chịu mất mạng |
@@ -340,45 +338,45 @@ Mỗi dataset phải lưu camera/IMU/ToF/khớp, timestamp gốc, calibration, c
 
 ## 11. Lộ trình phát triển đề xuất
 
-### Giai đoạn 0 — Đóng băng baseline
+### Giai đoạn 0 - Đóng băng baseline
 
 - Xác nhận model cảm biến, tần số, clock và khả năng timestamp phần cứng.
 - Tạo `sensor-recorder` ghi dữ liệu đồng bộ cùng metadata/calibration.
 - Định nghĩa frame tree và quy ước đơn vị; thêm replay tool bất biến theo commit.
 - **Cổng nghiệm thu:** dataset phát lại cho kết quả byte-stable hoặc sai số số học đã định nghĩa; vòng điều khiển không bị ảnh hưởng đáng kể.
 
-### Giai đoạn 1 — Bản đồ ToF 2D có thể kiểm chứng
+### Giai đoạn 1 - Bản đồ ToF 2D có thể kiểm chứng
 
 - Hoàn thiện/đánh giá `maploc`, head-sweep chủ động, phát hiện đứng yên và trượt chân.
 - So sánh continuous với stop-and-scan trên cùng quỹ đạo ground truth.
 - **Cổng nghiệm thu:** báo cáo ATE/RPE, map IoU, precision loop closure và relocalization trên toàn bộ run.
 
-### Giai đoạn 2 — Visual-inertial và fusion
+### Giai đoạn 2 - Visual-inertial và fusion
 
 - Hiệu chuẩn camera–IMU–head; đánh giá ORB-SLAM3 hoặc front-end VIO phù hợp.
 - Hợp nhất VIO, contact odometry và ToF trong factor graph/pose graph.
 - **Cổng nghiệm thu:** fusion cải thiện có ý nghĩa so với từng nguồn đơn và không làm tăng deadline miss của `robotd`.
 
-### Giai đoạn 3 — Tham chiếu địa lý và GIS
+### Giai đoạn 3 - Tham chiếu địa lý và GIS
 
 - Chọn RTK-GNSS cho ngoài trời hoặc UWB/GCP/AprilTag có tọa độ cho trong nhà.
 - Xây phép biến đổi `map → CRS`, covariance propagation và kiểm tra độc lập.
 - Xuất quỹ đạo GeoParquet, occupancy COG và semantic features GeoPackage/PostGIS.
 - **Cổng nghiệm thu:** CRS/axis/đơn vị rõ ràng; RMSE checkpoint đạt ngưỡng ứng dụng được công bố trước.
 
-### Giai đoạn 4 — WebGIS
+### Giai đoạn 4 - WebGIS
 
 - Tạo gateway đọc `robot.state`, `map.frame`, feature và health mà không mở quyền điều khiển nguy hiểm.
 - Xây ingestion, schema, lịch sử phiên, OGC API/vector tile/3D tile và giao diện MapLibre/Cesium.
 - **Cổng nghiệm thu:** hiển thị live + replay nhất quán; đo latency, packet loss, quyền truy cập và khả năng phục hồi.
 
-### Giai đoạn 5 — Multi-robot GeoAI
+### Giai đoạn 5 - Multi-robot GeoAI
 
 - Đồng bộ thời gian, trao đổi submap nén, nhận dạng robot và loop closure liên robot.
 - Tách local safety khỏi global task allocation; mạng mất không làm robot mất an toàn.
 - **Cổng nghiệm thu:** fleet tăng độ phủ hoặc giảm thời gian có ý nghĩa so với một robot, không làm tăng bản đồ sai do merge.
 
-### Giai đoạn 6 — Làm cứng hiện trường
+### Giai đoạn 6 - Làm cứng hiện trường
 
 - Vỏ bảo vệ, quản lý nhiệt/năng lượng, kiểm thử rung–rơi–bụi–ẩm, quyền riêng tư camera và threat model.
 - **Cổng nghiệm thu:** công bố điều kiện vận hành, failure envelope và quy trình dừng an toàn; không quảng bá vượt quá cấp thử nghiệm đã kiểm chứng.
@@ -453,25 +451,25 @@ Robot cũng có thể ngồi, đá bóng, lộn/trườn theo policy, phát âm 
 ## 16. Ghi công và giấy phép
 
 - **Dự án gốc:** [Pollen Robotics / Microduck](https://github.com/pollen-robotics/microduck), thuộc đội ngũ robotics của Hugging Face.
-- **Bản Việt hóa, hiệu đính và phát triển nội dung khoa học:** **Long Ngo — Vietflexmap, 2026.**
+- **Bản Việt hóa, hiệu đính và phát triển nội dung khoa học:** **Long Ngo - Vietflexmap, 2026.**
 - **Phạm vi đóng góp của bản này:** diễn giải tiếng Việt, phân tích SLAM–GIS–WebGIS, mô hình kiến trúc, khung đánh giá, giả thuyết và lộ trình kiểm chứng.
 - **Giấy phép mã nguồn:** [Apache License 2.0](LICENSE). Việc ghi công bản phân tích không thay đổi quyền tác giả đối với mã nguồn và thiết kế gốc.
 
 ## 17. Tài liệu tham khảo
 
-1. Pollen Robotics, [Microduck — source code and technical documentation](https://github.com/pollen-robotics/microduck), truy cập 05/09/2026.
+1. Pollen Robotics, [Microduck - source code and technical documentation](https://github.com/pollen-robotics/microduck), truy cập 05/09/2026.
 2. Pollen Robotics, [Microduck press kit and provisional specifications](https://pollen-robotics.com/microduck/press-kit/), 2026.
-3. Pollen Robotics, [Microduck RL — MuJoCo training environments](https://github.com/pollen-robotics/microduck_rl), 2026.
-4. Pollen Robotics, [Robot Daemon — Overall Architecture](docs/design/architecture.md), 2026.
+3. Pollen Robotics, [Microduck RL - MuJoCo training environments](https://github.com/pollen-robotics/microduck_rl), 2026.
+4. Pollen Robotics, [Robot Daemon - Overall Architecture](docs/design/architecture.md), 2026.
 5. Pollen Robotics, [Project Roadmap](docs/project/roadmap.md), 2026.
 6. A. Pirrone, [Maploc: mapping & localization as a robotd-hosted subcrate](https://github.com/pollen-robotics/microduck/pull/127), PR #127, 2026.
 7. J. Schulman et al., [Proximal Policy Optimization Algorithms](https://arxiv.org/abs/1707.06347), arXiv:1707.06347, 2017.
 8. C. Campos et al., [ORB-SLAM3: An Accurate Open-Source Library for Visual, Visual-Inertial, and Multi-Map SLAM](https://doi.org/10.1109/TRO.2021.3075644), *IEEE Transactions on Robotics*, 37(6), 2021.
 9. M. Labbé and F. Michaud, [RTAB-Map as an Open-Source LiDAR and Visual SLAM Library for Large-Scale and Long-Term Online Operation](https://doi.org/10.1002/rob.21831), *Journal of Field Robotics*, 36(2), 2019.
-10. Open Geospatial Consortium, [OGC API — Features — Part 1: Core](https://docs.ogc.org/is/17-069r3/17-069r3.html).
-11. Open Geospatial Consortium, [OGC API — Tiles — Part 1: Core](https://docs.ogc.org/is/20-057/20-057.html).
+10. Open Geospatial Consortium, [OGC API - Features - Part 1: Core](https://docs.ogc.org/is/17-069r3/17-069r3.html).
+11. Open Geospatial Consortium, [OGC API - Tiles - Part 1: Core](https://docs.ogc.org/is/20-057/20-057.html).
 12. Open Geospatial Consortium, [3D Tiles 1.1 Specification](https://docs.ogc.org/cs/22-025r4/22-025r4.html).
-13. IETF, [RFC 7946 — The GeoJSON Format](https://www.rfc-editor.org/rfc/rfc7946), 2016.
+13. IETF, [RFC 7946 - The GeoJSON Format](https://www.rfc-editor.org/rfc/rfc7946), 2016.
 14. W. Hess et al., [Real-Time Loop Closure in 2D LIDAR SLAM](https://doi.org/10.1109/ICRA.2016.7487258), *IEEE ICRA*, 2016.
 15. E. Todorov, T. Erez and Y. Tassa, [MuJoCo: A Physics Engine for Model-Based Control](https://doi.org/10.1109/IROS.2012.6386109), *IEEE/RSJ IROS*, 2012.
 16. J. Sturm et al., [A Benchmark for the Evaluation of RGB-D SLAM Systems](https://doi.org/10.1109/IROS.2012.6385773), *IEEE/RSJ IROS*, 2012.
